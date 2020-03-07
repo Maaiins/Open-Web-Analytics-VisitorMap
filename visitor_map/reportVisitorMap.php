@@ -47,7 +47,10 @@ class owa_reportVisitorMapController extends owa_reportController {
 
         $db->join(OWA_SQL_JOIN, $s->getTableName(), 'session', 'location.id', 'session.location_id');
 
-        $db->selectColumn('count(session.visitor_id) as visitor_count');
+        $db->selectColumn('session.timestamp as visit_time');
+        $db->selectColumn('(session.last_req - session.timestamp) as duration');
+        $db->selectColumn('session.medium as medium');
+        $db->selectColumn('session.os as os');
         $db->selectColumn('location.latitude as latitude');
         $db->selectColumn('location.longitude as longitude');
 
@@ -59,11 +62,35 @@ class owa_reportVisitorMapController extends owa_reportController {
             $db->where('session.yyyymmdd', array('start' => $startDate, 'end' => $endDate), 'BETWEEN');
         }
 
-        $db->groupBy('session.visitor_id');
-        $db->groupBy('location.latitude');
-        $db->groupBy('location.longitude');
+        $sessions = $db->getAllRows();
 
-        $this->set('locations', json_encode($db->getAllRows()));
+        if ($sessions) {
+            $sessions = array_map(function ($session) {
+                $visitTime = new DateTime();
+                $visitTime->setTimestamp($session['visit_time']);
+
+                $session['popup_content'] .= htmlspecialchars($visitTime->format('D M j G:i:s T')) . ' » ';
+
+                $duration = new DateTime();
+                $duration->setTimestamp($session['duration']);
+
+                $session['popup_content'] .= htmlspecialchars($duration->format('G:i:s')) . '<br/>';
+
+                $session['popup_content'] .= 'Source: ' . htmlspecialchars($session['medium']) . '<br/>';
+                $session['popup_content'] .= 'Using: ' . htmlspecialchars($session['os']) . '<br/>';
+
+                unset($session['visit_time']);
+                unset($session['duration']);
+                unset($session['medium']);
+                unset($session['os']);
+
+                return $session;
+            }, $sessions);
+        } else {
+            $sessions = [];
+        }
+
+        $this->set('locations', json_encode($sessions));
     }
 }
 

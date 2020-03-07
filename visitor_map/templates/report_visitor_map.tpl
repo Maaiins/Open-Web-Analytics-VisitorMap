@@ -5,14 +5,14 @@
     <div id="map-canvas" style="width: 100%; height: 425px"></div>
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
-<script type="text/javascript" src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
-<script type="text/javascript" src="https://unpkg.com/heatmap.js@2.0.5/build/heatmap.js" crossorigin=""></script>
-<script type="text/javascript" src="https://unpkg.com/leaflet-heatmap@1.0.0/leaflet-heatmap.js" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" crossorigin=""/>
+<script type="text/javascript" src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" crossorigin=""></script>
+<script type="text/javascript" src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" crossorigin=""></script>
+
 <script type="text/javascript">
-    var data = {
-        data: <?php echo $this->get('locations'); ?>
-    };
+    var data = <?php echo $this->get('locations'); ?>;
 
 
     var baseLayer = L.tileLayer(
@@ -21,60 +21,17 @@
         }
     );
 
-    var cfg = {
-        // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-        'radius': 2,
-        'maxOpacity': .8,
-        // scales the radius based on map zoom
-        'scaleRadius': true,
-        // if set to false the heatmap uses the global maximum for colorization
-        // if activated: uses the data maximum within the current map boundaries
-        //   (there will always be a red spot with useLocalExtremas true)
-        'useLocalExtrema': true,
-        // which field name in your data represents the latitude - default "lat"
-        latField: 'latitude',
-        // which field name in your data represents the longitude - default "lng"
-        lngField: 'longitude',
-        // which field name in your data represents the data value - default "value"
-        valueField: 'visitor_count'
-    };
+    var markers = L.markerClusterGroup({ chunkedLoading: true });
 
-    var heatmapLayer = new HeatmapOverlay(cfg);
+    for (var i = 0; i < data.length; i++) {
+        var marker = L.marker(L.latLng(data[i].latitude, data[i].longitude));
+        marker.bindPopup(data[i].popup_content);
+        markers.addLayer(marker);
+    }
 
     var map = new L.Map('map-canvas', {
         center: new L.LatLng(0, 0),
         zoom: 1,
-        layers: [baseLayer, heatmapLayer]
+        layers: [baseLayer, markers]
     });
-
-    var wrapper = document.querySelector('#map-wrapper');
-    var tooltip = document.querySelector('#tooltip');
-
-    function updateTooltip(x, y, value) {
-        var transl = 'translate(' + x + 'px, ' + (y + 15) + 'px)';
-        tooltip.style.webkitTransform = transl;
-        tooltip.innerHTML = value;
-    }
-
-    wrapper.onmousemove = function(ev) {
-        var x = ev.layerX;
-        var y = ev.layerY;
-        var value = heatmapLayer._heatmap.getValueAt({
-            x: x,
-            y: y
-        });
-
-        if (value <= 0) {
-            return;
-        }
-
-        tooltip.style.display = 'block';
-        updateTooltip(x, y, value);
-    };
-
-    wrapper.onmouseout = function() {
-        tooltip.style.display = 'none';
-    };
-
-    heatmapLayer.setData(data);
 </script>
