@@ -41,6 +41,7 @@ class owa_visitor_mapModule extends owa_module {
      */
 	public function registerNavigation() {
         $this->addNavigationLinkInSubGroup( 'Visitors', 'visitor_map.reportVisitorMap', 'Map', 99);
+        $this->addNavigationLinkInSubGroup( 'Ecommerce', 'visitor_map.reportConversionMap', 'Map', 99);
 	}
 }
 ?>
