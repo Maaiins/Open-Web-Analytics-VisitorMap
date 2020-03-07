@@ -1,5 +1,5 @@
 # Open-Web-Analytics-VisitorMap
-Simple visitor map to display visitor location and count on leaflet map for OpenWebAnalytics
+Simple visitor map to display visitor locations and revenues.
 
 # Installation
 - Download the project
@@ -7,3 +7,15 @@ Simple visitor map to display visitor location and count on leaflet map for Open
 - Got to Administration -> Modules
 - Activate the module
 - Enjoy
+
+# Screenshots
+
+## Ecommerce Map
+Displays a simple heatmap based on the sum of revenues
+
+![ecommerce map](https://raw.githubusercontent.com/Maaiins/Open-Web-Analytics-VisitorMap/master/screenshots/ecommerce_map.png)
+
+## Visitor Map
+Displays one marker for each visitor and builds a cluster
+
+![visitor map](https://raw.githubusercontent.com/Maaiins/Open-Web-Analytics-VisitorMap/master/screenshots/visitor_map.png)
